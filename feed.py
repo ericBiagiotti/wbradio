@@ -5,8 +5,9 @@ from datetime import datetime
 from datetime import timedelta
 from http import HTTPStatus
 import requests
+import pytz
 
-URL = 'https://s3.amazonaws.com/mperry8889/wickedbites.rss'
+URL = 'https://s3.amazonaws.com/ebiagiotti/wickedbites.rss'
 
 def main():
     now = datetime.now()
@@ -28,7 +29,7 @@ def main():
     fg.podcast.itunes_explicit('no')
     fg.podcast.itunes_new_feed_url(URL)
     fg.podcast.itunes_category('Arts', 'Food')
-    fg.podcast.itunes_owner('Matt Perry', 'mperry8889@gmail.com')
+    fg.podcast.itunes_owner('Eric Biagiotti', 'eric.biagiotti@gmail.com')
 
     for i in range(10):
         datestamp = (most_recent_sunday - timedelta(weeks=i))
@@ -39,7 +40,7 @@ def main():
             entry = fg.add_entry(order='append')
             entry.id(url)
             entry.title(datestamp.strftime('%m/%d/%Y'))
-            entry.pubdate(datestamp.strftime('%Y-%m-%d 12:00:00 EST'))
+            entry.pubdate(datestamp.strftime('%Y-%m-%d 00:00:00 UTC'))
             entry.description(datestamp.strftime('Wicked Bites Radio show for %A, %B %e %Y'))
             entry.podcast.itunes_summary(datestamp.strftime('Wicked Bites Radio show for %A, %B %e %Y'))
             entry.enclosure(url, r.headers.get('Content-Length', 0), 'audio/mpeg')
