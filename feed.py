@@ -3,9 +3,9 @@
 from feedgen.feed import FeedGenerator
 from datetime import datetime
 from datetime import timedelta
-from http import HTTPStatus
+import boto
+import http
 import requests
-import pytz
 
 URL = 'https://s3.amazonaws.com/ebiagiotti/wickedbites.rss'
 
@@ -23,7 +23,7 @@ def main():
     fg.logo('http://www.nedine.com/wp-content/themes/wickedbites/images/logo.png')
     fg.link(href='http://www.nedine.com', rel='alternate')
     fg.link(href=URL, rel='self')
-    fg.description('''The Pat Whitley Restaurant Show – The Country’s longest Running and most successful Restaurant Show, Sundays 10am-Noon on WRKO, Pat Whitley is the 'brand' on America's First Restaurant Show. Heard every show: "Praise or Zing from Pizza to Gourmet – where you are the food critic"''')
+    fg.description('The Pat Whitley Restaurant Show')
     fg.podcast.itunes_category('Food')
     fg.podcast.itunes_summary('Pat Whitley Restaurant Show')
     fg.podcast.itunes_explicit('no')
@@ -36,17 +36,21 @@ def main():
         url = 'http://www.nedine.com/Radio/Shows/%s.mp3' % datestamp.strftime('%m%d%y')
 
         r = requests.head(url)
-        if r.status_code == HTTPStatus.OK:
+        if r.status_code == 200:
             entry = fg.add_entry(order='append')
             entry.id(url)
             entry.title(datestamp.strftime('%m/%d/%Y'))
-            entry.pubdate(datestamp.strftime('%Y-%m-%d 00:00:00 UTC'))
+            entry.pubDate(datestamp.strftime('%Y-%m-%d 00:00:00 UTC'))
             entry.description(datestamp.strftime('Wicked Bites Radio show for %A, %B %e %Y'))
             entry.podcast.itunes_summary(datestamp.strftime('Wicked Bites Radio show for %A, %B %e %Y'))
             entry.enclosure(url, r.headers.get('Content-Length', 0), 'audio/mpeg')
 
     fg.rss_file('wickedbites.rss')
-
-
+    
+    s3_connection = boto.connect_s3()
+    bucket = s3_connection.get_bucket('ebiagiotti')
+    key = boto.s3.key.Key(bucket, 'wickedbites.rss')
+    key.set_contents_from_filename('wickedbites.rss')
+    
 if __name__ == '__main__':
     main()
