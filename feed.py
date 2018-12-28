@@ -50,7 +50,7 @@ def main():
     s3_connection = boto.connect_s3()
     bucket = s3_connection.get_bucket('ebiagiotti')
     key = boto.s3.key.Key(bucket, 'wickedbites.rss')
-    key.set_contents_from_filename('wickedbites.rss')
+    key.set_contents_from_filename('wickedbites.rss', policy='public-read')
     
 if __name__ == '__main__':
     main()
